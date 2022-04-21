@@ -53,13 +53,13 @@ Come up with a single estimate of atmospheric conductance for this forest.
 
 Consider the sensitivity of your estimate to uncertainty in the following parameters and inputs
 
--   h
+-   `h`
 
--   kd
+-   `kd`
 
--   ko
+-   `ko`
 
--   v
+-   `v`
 
 Windspeeds `v` are normally distributed with a mean of 250 cm/sec with a standard deviation of 30 cm/sec
 
@@ -67,14 +67,14 @@ For vegetation height assume that height is somewhere between 9.5 and 10.5 m (bu
 
 For the `kd` and `ko` parameters you can assume that they are normally distributed with standard deviation of 1% of their default values
 
-a) use LHS to generate parameter values for the 4 parameters
+a)  use LHS to generate parameter values for the 4 parameters
 
-b) run you atmospheric conductance model for these parameters and return aerodynamic conductances
+b)  run you atmospheric conductance model for these parameters and return aerodynamic conductances
 
-c) Plot conductance estimates in a way that accounts for parameter uncertainty
+c)  Plot conductance estimates in a way that accounts for parameter uncertainty
 
-d) Plot conductance estimates against each of your parameters
+d)  Plot conductance estimates against each of your parameters
 
-e) Estimate the Partial Rank Correlation Coefficients
+e)  Estimate the Partial Rank Correlation Coefficients
 
-f) Discuss what your results tell you about how aerodynamic conductance? What does it suggest about what you should focus on if you want to reduce uncertainty in aerodymaic conductance estimates? Does this tell you anything about the sensitivity of plant water use to climate change?
+f)  Discuss what your results tell you about how aerodynamic conductance? What does it suggest about what you should focus on if you want to reduce uncertainty in aerodymaic conductance estimates? Does this tell you anything about the sensitivity of plant water use to climate change?
