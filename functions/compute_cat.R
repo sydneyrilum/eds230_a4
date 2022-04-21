@@ -19,7 +19,8 @@ compute_cat <- function(zm, h, v, kd = 0.7, k0 = 0.1) {
   
   z0 = k0 * h
   
-  cat = v / (6.25 * log( (zm - zd) / z0 )**2)
+  cat = v / (6.25 * log( ((zm - zd) / z0 )**2) )
   
+  return(cat)
 }
 
