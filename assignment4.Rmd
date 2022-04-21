@@ -168,7 +168,12 @@ sens_cat = pse::tell(sens_cat, t(as.matrix(conductances_test)),
 c)  Plot conductance estimates in a way that accounts for parameter uncertainty
 
 ```{r}
+tmp = conductances_test %>% gather(value="value", key="yield")
 
+ggplot(tmp, aes(y = value)) + 
+  geom_boxplot() +
+  labs(y="Atmospheric Conductance (cm/sec)") + 
+  theme_classic()
 ```
 
 
@@ -184,6 +189,5 @@ e)  Estimate the Partial Rank Correlation Coefficients
 ```{r}
 pse::plotprcc(sens_cat)
 ```
-
 
 f)  Discuss what your results tell you about how aerodynamic conductance? What does it suggest about what you should focus on if you want to reduce uncertainty in aerodymaic conductance estimates? Does this tell you anything about the sensitivity of plant water use to climate change?
