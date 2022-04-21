@@ -17,10 +17,14 @@ if (!require(librarian)){
 }
 
 librarian::shelf(
-  ggpubr,
+  purrr,
+  sensitivity,
+  pse,
   here,
-  tidyverse,
   tidyverse)
+
+#source in cat function 
+source(here("functions", "compute_cat.R"))
 ```
 
 # Introduction
@@ -49,6 +53,38 @@ You are estimating the atmospheric conductance for a forest that is 10 m high (t
 
 Come up with a single estimate of atmospheric conductance for this forest.
 
+Set up the parameters 
+```{r}
+#parameters
+nsamples = 100
+
+#h = 10m
+h_default <- 10 * 100 
+h_deviation = 0.5 * 100
+
+h <- runif(min = h_default - h_deviation, 
+           max = h_default + h_deviation,
+           n=nsamples)
+
+v_mean <- 250
+v_sd <- 30
+
+v <- rnorm(mean = v_mean, sd = v_sd, n = nsamples)
+
+#bind vegetation height (h) and windspeed (v) into a dataframe 
+parameters <- cbind.data.frame(h, v)
+```
+
+Run the model 
+```{r}
+results <- compute_cat(h = parameters$h, v = parameters$v)
+
+mean_cat <- round(mean(results), digits = 2)
+#should be 15.44 ?
+```
+
+The model estimates that the mean atmospheric conductance for this forest is approximately `r mean_cat` cm/sec. 
+
 # 3. Now do a sensitivity analysis as follows
 
 Consider the sensitivity of your estimate to uncertainty in the following parameters and inputs
@@ -65,16 +101,89 @@ Windspeeds `v` are normally distributed with a mean of 250 cm/sec with a standar
 
 For vegetation height assume that height is somewhere between 9.5 and 10.5 m (but any value in that range is equally likely)
 
+```{r}
+#parameters
+nsamples = 100
+h_min = 9.5 * 100
+h_max = 10.5 * 100
+
+h <- runif(min = h_min, 
+           max = h_max,
+           n=nsamples)
+```
+
+
 For the `kd` and `ko` parameters you can assume that they are normally distributed with standard deviation of 1% of their default values
 
+```{r}
+kd_default = 0.7
+k0_default = 0.1 
+
+kd_sd = 0.01 * kd_default
+k0_sd = 0.01 * k0_default
+
+kd <- rnorm(mean = kd_default, sd = kd_sd, n = nsamples)
+k0 <- rnorm(mean = k0_default, sd = k0_sd, n = nsamples)
+```
+
 a)  use LHS to generate parameter values for the 4 parameters
+1. v - normally distributed
+2. h - uniform distribution 
+3. k0 - normally distributed
+4. kd - normally distributed 
+
+```{r}
+# considering 4 parameters
+factors = c("v", "h", "k0", "kd")
+
+# Decide how many parameter sets to generate
+nsets=100
+
+q = c("qnorm", "qunif", "qnorm", "qnorm")
+
+q.arg = list(list(mean = 250, sd = 30), #v
+             list(min = 9.5 * 100, max = 10.5 * 100), #h
+             list(mean = k0_default, sd = k0_sd), #k0
+             list(mean = kd_default, sd = kd_sd)) #kd
+
+# generate samples from LHS
+sens_cat = LHS(NULL, factors, nsets, q, q.arg) 
+sens_parameters = get.data(sens_cat) #we want to know what parameters we want to run 
+head(sens_parameters) #we can look at all the parameter values we want to run - we will have 100 parameter sets 
+```
 
 b)  run you atmospheric conductance model for these parameters and return aerodynamic conductances
 
+```{r}
+conductances <- sens_parameters %>% pmap(compute_cat) 
+conductances_test <- as.data.frame(unlist(conductances))
+
+#yieldsd = conductances %>% map_dfr(`[`)
+
+sens_cat = pse::tell(sens_cat, t(as.matrix(conductances_test)),
+                        res.names=c("conductance"))
+```
+
+
 c)  Plot conductance estimates in a way that accounts for parameter uncertainty
+
+```{r}
+
+```
+
 
 d)  Plot conductance estimates against each of your parameters
 
+```{r}
+pse::plotscatter(sens_cat, col="blue", cex=5)
+```
+
+
 e)  Estimate the Partial Rank Correlation Coefficients
+
+```{r}
+pse::plotprcc(sens_cat)
+```
+
 
 f)  Discuss what your results tell you about how aerodynamic conductance? What does it suggest about what you should focus on if you want to reduce uncertainty in aerodymaic conductance estimates? Does this tell you anything about the sensitivity of plant water use to climate change?
