@@ -195,4 +195,6 @@ pse::plotscatter(sens_cat, col="blue", cex=5)
 pse::plotprcc(sens_cat)
 ```
 
-## f) Discuss what your results tell you about how aerodynamic conductance varies with the different parameters. What does it suggest about what you should focus on if you want to reduce uncertainty in aerodymaic conductance estimates? Does this tell you anything about the sensitivity of plant water use to climate change?
+## f) Discuss what your results tell you about how aerodynamic conductance varies with the different parameters.
+
+*What does it suggest about what you should focus on if you want to reduce uncertainty in aerodymaic conductance estimates? Does this tell you anything about the sensitivity of plant water use to climate change?*
