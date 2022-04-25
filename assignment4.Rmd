@@ -111,13 +111,23 @@ The model estimates that the mean atmospheric conductance for this forest is app
 
 -   *`v`*: windspeed (cm/sec)
 
-*Windspeeds (`v`) are normally distributed with a mean of 250 cm/sec with a standard deviation of 30 cm/sec*
+*Windspeeds (`v`) are normally distributed with a mean of 250 cm/sec with a standard deviation of 30 cm/sec.*
 
-*For vegetation height assume that height is somewhere between 9.5 and 10.5 m (but any value in that range is equally likely)*
+*For vegetation height assume that height is somewhere between 9.5 and 10.5 m (but any value in that range is equally likely).*
 
-*For the `kd` and `ko` parameters you can assume that they are normally distributed with standard deviation of 1% of their default values*
+*For the `kd` and `ko` parameters you can assume that they are normally distributed with standard deviation of 1% of their default values.*
 
-## a) *use LHS to generate parameter values for the 4 parameters*
+```{r}
+#set default parameters 
+kd_default = 0.7
+k0_default = 0.1 
+
+#calculate SD 
+kd_sd = 0.01 * kd_default
+k0_sd = 0.01 * k0_default
+```
+
+## a) *Use LHS to generate parameter values for the 4 parameters*
 
 Note the following sample distribution types:
 
@@ -144,31 +154,33 @@ q.arg = list(list(mean = 250, sd = 30),               #v
 
 # generate samples from LHS
 sens_cat = LHS(NULL, factors, nsets, q, q.arg) 
-sens_parameters = get.data(sens_cat) #we want to know what parameters we want to run 
-head(sens_parameters) #we can look at all the parameter values we want to run - we will have 100 parameter sets 
+sens_parameters = get.data(sens_cat) 
+
+head(sens_parameters, n = 10) #check that we have 100 parameter sets 
 ```
 
-## b) run you atmospheric conductance model for these parameters and return aerodynamic conductances
+## b) *Run you atmospheric conductance model for these parameters and return aerodynamic conductances*
 
 ```{r}
-conductances <- sens_parameters %>% pmap(compute_cat) 
-conductances_test <- as.data.frame(unlist(conductances))
+conductances <- sens_parameters %>% pmap(compute_cat)
+conductances_df <- as.data.frame(unlist(conductances)) %>% 
+  rename(conductances = "unlist(conductances)")
 
-#yieldsd = conductances %>% map_dfr(`[`)
-
-sens_cat = pse::tell(sens_cat, t(as.matrix(conductances_test)),
+sens_cat = pse::tell(sens_cat, t(as.matrix(conductances_df)),
                         res.names=c("conductance"))
 ```
 
-## c) Plot conductance estimates in a way that accounts for parameter uncertainty
+## c) *Plot conductance estimates in a way that accounts for parameter uncertainty*
 
 ```{r}
-tmp = conductances_test %>% gather(value="value", key="yield")
+tmp = conductances_df %>% gather(value="conductances", key="conductances")
 
-ggplot(tmp, aes(y = value)) + 
+ggplot(tmp, aes(y = conductances)) + 
   geom_boxplot() +
+  theme(axis.title.x=element_blank(), axis.title.y=element_blank()) +
   labs(y="Atmospheric Conductance (cm/sec)") + 
   theme_classic()
+  
 ```
 
 ## d) Plot conductance estimates against each of your parameters
@@ -183,4 +195,4 @@ pse::plotscatter(sens_cat, col="blue", cex=5)
 pse::plotprcc(sens_cat)
 ```
 
-## f) Discuss what your results tell you about how aerodynamic conductance? What does it suggest about what you should focus on if you want to reduce uncertainty in aerodymaic conductance estimates? Does this tell you anything about the sensitivity of plant water use to climate change?
+## f) Discuss what your results tell you about how aerodynamic conductance varies with the different parameters. What does it suggest about what you should focus on if you want to reduce uncertainty in aerodymaic conductance estimates? Does this tell you anything about the sensitivity of plant water use to climate change?
