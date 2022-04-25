@@ -103,45 +103,23 @@ The model estimates that the mean atmospheric conductance for this forest is app
 
 *Consider the sensitivity of your estimate to uncertainty in the following parameters and inputs*
 
--   *`h`*
+-   *`h`*: vegetation height (cm)
 
 -   *`kd`*
 
 -   *`ko`*
 
--   *`v`*
+-   *`v`*: windspeed (cm/sec)
 
-*Windspeeds `v` are normally distributed with a mean of 250 cm/sec with a standard deviation of 30 cm/sec*
+*Windspeeds (`v`) are normally distributed with a mean of 250 cm/sec with a standard deviation of 30 cm/sec*
 
 *For vegetation height assume that height is somewhere between 9.5 and 10.5 m (but any value in that range is equally likely)*
 
-```{r}
-#parameters
-nsamples = 100
-h_min = 9.5 * 100
-h_max = 10.5 * 100
+*For the `kd` and `ko` parameters you can assume that they are normally distributed with standard deviation of 1% of their default values*
 
-h <- runif(min = h_min, 
-           max = h_max,
-           n=nsamples)
-```
+## a) *use LHS to generate parameter values for the 4 parameters*
 
-For the `kd` and `ko` parameters you can assume that they are normally distributed with standard deviation of 1% of their default values
-
-```{r}
-kd_default = 0.7
-k0_default = 0.1 
-
-kd_sd = 0.01 * kd_default
-k0_sd = 0.01 * k0_default
-
-kd <- rnorm(mean = kd_default, sd = kd_sd, n = nsamples)
-k0 <- rnorm(mean = k0_default, sd = k0_sd, n = nsamples)
-```
-
-a)  use LHS to generate parameter values for the 4 parameters
-
-<!-- -->
+Note the following sample distribution types:
 
 1.  v - normally distributed
 2.  h - uniform distribution
@@ -149,18 +127,20 @@ a)  use LHS to generate parameter values for the 4 parameters
 4.  kd - normally distributed
 
 ```{r}
-# considering 4 parameters
+#consider the 4 parameters
 factors = c("v", "h", "k0", "kd")
 
-# Decide how many parameter sets to generate
+#decide how many parameter sets to generate
 nsets=100
 
+#note which parameter uses which type of distribution 
 q = c("qnorm", "qunif", "qnorm", "qnorm")
 
-q.arg = list(list(mean = 250, sd = 30), #v
+#generate the distributions for each parameter 
+q.arg = list(list(mean = 250, sd = 30),               #v
              list(min = 9.5 * 100, max = 10.5 * 100), #h
-             list(mean = k0_default, sd = k0_sd), #k0
-             list(mean = kd_default, sd = kd_sd)) #kd
+             list(mean = k0_default, sd = k0_sd),     #k0
+             list(mean = kd_default, sd = kd_sd))     #kd
 
 # generate samples from LHS
 sens_cat = LHS(NULL, factors, nsets, q, q.arg) 
@@ -168,7 +148,7 @@ sens_parameters = get.data(sens_cat) #we want to know what parameters we want to
 head(sens_parameters) #we can look at all the parameter values we want to run - we will have 100 parameter sets 
 ```
 
-b)  run you atmospheric conductance model for these parameters and return aerodynamic conductances
+## b) run you atmospheric conductance model for these parameters and return aerodynamic conductances
 
 ```{r}
 conductances <- sens_parameters %>% pmap(compute_cat) 
@@ -180,7 +160,7 @@ sens_cat = pse::tell(sens_cat, t(as.matrix(conductances_test)),
                         res.names=c("conductance"))
 ```
 
-c)  Plot conductance estimates in a way that accounts for parameter uncertainty
+## c) Plot conductance estimates in a way that accounts for parameter uncertainty
 
 ```{r}
 tmp = conductances_test %>% gather(value="value", key="yield")
@@ -191,16 +171,16 @@ ggplot(tmp, aes(y = value)) +
   theme_classic()
 ```
 
-d)  Plot conductance estimates against each of your parameters
+## d) Plot conductance estimates against each of your parameters
 
 ```{r}
 pse::plotscatter(sens_cat, col="blue", cex=5)
 ```
 
-e)  Estimate the Partial Rank Correlation Coefficients
+## e) Estimate the Partial Rank Correlation Coefficients
 
 ```{r}
 pse::plotprcc(sens_cat)
 ```
 
-f)  Discuss what your results tell you about how aerodynamic conductance? What does it suggest about what you should focus on if you want to reduce uncertainty in aerodymaic conductance estimates? Does this tell you anything about the sensitivity of plant water use to climate change?
+## f) Discuss what your results tell you about how aerodynamic conductance? What does it suggest about what you should focus on if you want to reduce uncertainty in aerodymaic conductance estimates? Does this tell you anything about the sensitivity of plant water use to climate change?
