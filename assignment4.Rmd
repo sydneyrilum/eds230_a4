@@ -2,7 +2,9 @@
 title: "Assignment w/Latin Hypercube Sampling (LHS)"
 author: "Mia Forsline, Kristin Gill, Sydney Rilum"
 date: '2022-04-26'
-output: html_document
+output:
+  pdf_document: default
+  html_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -22,46 +24,56 @@ librarian::shelf(
   pse,
   here,
   tidyverse)
-
-#source in cat function 
-source(here("functions", "compute_cat.R"))
 ```
 
 # Introduction
 
-Often when we are estimating vegetation or crop water use we need to know the atmospheric conductance - which is essentially how easily water diffuses into the air and depends largely on windspeed (you get more evaporation in windier conditions) Atmospheric conductance is also influenced by the vegetation itself and the turbulence it creates
+For this assignment, we are interested in estimating vegetation or crop water by first estimating atmospheric conductance, which is how easily water diffuses into the air. Atmospheric conductance depends on factors such as windspeed (you get more evaporation in windier conditions), the vegetation itself, and the turbulence it creates.
 
-# 1. Code a function to compute atmospheric conductance Cat (how easily vapor diffuses from vegetation surfaces)
+# 1. Code a function to compute atmospheric conductance C~at~ (how easily vapor diffuses from vegetation surfaces)
 
-![Equation for atmospheric conductance C~at~, how easily vapor diffuses from vegettaion surfaces](images/hw4_equation.png)
+![Equation for atmospheric conductance C~at~, how easily vapor diffuses from vegetation surfaces](images/hw4_equation.png)
 
-Note that:
+*Note that:*
 
--   `zm`: height at which windspeed is measured (usually 200cm above the vegetation)
+-   *`zm`: height at which windspeed is measured (usually 200cm above the vegetation)*
 
--   `h`: vegetation height (cm)
+-   *`h`: vegetation height (cm)*
 
--   `v`: windspeed (cm/sec)
+-   *`v`: windspeed (cm/sec)*
 
--   `kd`: 0.7
+-   *`kd`: 0.7*
 
--   `ko`: 0.1
+-   *`ko`: 0.1*
+
+```{r}
+#source in atmospheric conductance (cat) function 
+source(here("functions", "compute_cat.R"))
+```
 
 # 2. Run your model
 
-You are estimating the atmospheric conductance for a forest that is 10 m high (the accuracy of that measurement is +/- 0.5 m ) Windspeeds `v` in this region are normally distributed with a mean of 250 cm/s with a standard deviation of 30 cm/sec.
+*You are estimating the atmospheric conductance for a forest that is 10 m high (the accuracy of that measurement is +/- 0.5 m ) Windspeeds (`v`) in this region are normally distributed with a mean of 250 cm/s with a standard deviation of 30 cm/sec.*
 
-Come up with a single estimate of atmospheric conductance for this forest.
+*Come up with a single estimate of atmospheric conductance for this forest.*
 
-Set up the parameters 
+Set up the C~at~ model parameters:
+
+-   number of samples
+
+-   `h`: vegetation height (m)
+
+-   `v`: windspeed (cm/sec)
+
 ```{r}
 #parameters
 nsamples = 100
 
-#h = 10m
+#convert m to cm to match the windspeed units 
 h_default <- 10 * 100 
 h_deviation = 0.5 * 100
 
+#sample from the uniform distribution of plant heights based on the given forest height accuracy of +/- 0.5m 
 h <- runif(min = h_default - h_deviation, 
            max = h_default + h_deviation,
            n=nsamples)
@@ -69,13 +81,15 @@ h <- runif(min = h_default - h_deviation,
 v_mean <- 250
 v_sd <- 30
 
+#sample the normal distribution of windspeeds based on the given mean and SD values 
 v <- rnorm(mean = v_mean, sd = v_sd, n = nsamples)
 
-#bind vegetation height (h) and windspeed (v) into a dataframe 
+#bind vegetation height (h) and windspeed (v) into a parameters dataframe 
 parameters <- cbind.data.frame(h, v)
 ```
 
-Run the model 
+Run the model
+
 ```{r}
 results <- compute_cat(h = parameters$h, v = parameters$v)
 
@@ -83,23 +97,23 @@ mean_cat <- round(mean(results), digits = 2)
 #should be 15.44 ?
 ```
 
-The model estimates that the mean atmospheric conductance for this forest is approximately `r mean_cat` cm/sec. 
+The model estimates that the mean atmospheric conductance for this forest is approximately `r mean_cat` cm/sec.
 
 # 3. Now do a sensitivity analysis as follows
 
-Consider the sensitivity of your estimate to uncertainty in the following parameters and inputs
+*Consider the sensitivity of your estimate to uncertainty in the following parameters and inputs*
 
--   `h`
+-   *`h`*
 
--   `kd`
+-   *`kd`*
 
--   `ko`
+-   *`ko`*
 
--   `v`
+-   *`v`*
 
-Windspeeds `v` are normally distributed with a mean of 250 cm/sec with a standard deviation of 30 cm/sec
+*Windspeeds `v` are normally distributed with a mean of 250 cm/sec with a standard deviation of 30 cm/sec*
 
-For vegetation height assume that height is somewhere between 9.5 and 10.5 m (but any value in that range is equally likely)
+*For vegetation height assume that height is somewhere between 9.5 and 10.5 m (but any value in that range is equally likely)*
 
 ```{r}
 #parameters
@@ -111,7 +125,6 @@ h <- runif(min = h_min,
            max = h_max,
            n=nsamples)
 ```
-
 
 For the `kd` and `ko` parameters you can assume that they are normally distributed with standard deviation of 1% of their default values
 
@@ -127,10 +140,13 @@ k0 <- rnorm(mean = k0_default, sd = k0_sd, n = nsamples)
 ```
 
 a)  use LHS to generate parameter values for the 4 parameters
-1. v - normally distributed
-2. h - uniform distribution 
-3. k0 - normally distributed
-4. kd - normally distributed 
+
+<!-- -->
+
+1.  v - normally distributed
+2.  h - uniform distribution
+3.  k0 - normally distributed
+4.  kd - normally distributed
 
 ```{r}
 # considering 4 parameters
@@ -164,7 +180,6 @@ sens_cat = pse::tell(sens_cat, t(as.matrix(conductances_test)),
                         res.names=c("conductance"))
 ```
 
-
 c)  Plot conductance estimates in a way that accounts for parameter uncertainty
 
 ```{r}
@@ -176,13 +191,11 @@ ggplot(tmp, aes(y = value)) +
   theme_classic()
 ```
 
-
 d)  Plot conductance estimates against each of your parameters
 
 ```{r}
 pse::plotscatter(sens_cat, col="blue", cex=5)
 ```
-
 
 e)  Estimate the Partial Rank Correlation Coefficients
 
