@@ -219,3 +219,5 @@ Although aerodynamic conductance varies with vegetation height (`h`), `kd`, and 
 Windspeed has the largest PRCC value (`r v`) of all parameters, indicating a strong correlation to aerodynamic conductance. In contrast, the other parameters have PRCC's ranging from `r k0` to `r kd`, indicating moderate correlations. 
 
 These results are logical, as windspeed likely impacts plant water use the most (due greater evaporation in windier conditions), compared to plant height (`h`), `kd`, and `k0` parameters. Therefore, based on our sensitivity analysis results, we should focus on the windspeed parameter (`v`) to reduce uncertainty in aerodynamic conductance estimates.
+
+As climate change progresses, windspeed will most likely change and thus impact both aerodynamic conductance and plant water use. 

@@ -1,0 +1,80 @@
+---
+title: "Sobol Sensitivity Analysis (In-Class Demo 2022-04-026)"
+author: "Mia Forsline"
+date: '2022-04-26'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE,
+                      message = FALSE, 
+                      warning = FALSE)
+
+#install packages if necessary, then load libraries
+if (!require(librarian)){
+  install.packages("librarian")
+  library(librarian)
+}
+
+librarian::shelf(
+  purrr,
+  sensitivity,
+  pse,
+  here,
+  tidyverse)
+
+#run hw4 RMD first 
+```
+
+# Empirical Cumulative Distribution 
+
+```{r}
+plotecdf(sens_cat, col="red", lwd=5, xlab="Atm Cond (mm/s)")
+```
+
+# Sobol 
+
+```{r}
+# generate two examples of random number from parmeter distributions
+
+np=1000
+k_o = rnorm(mean=0.1,sd=0.1*0.1, n=np)
+k_d = rnorm(mean=0.7, sd=0.7*0.1, n=np)
+v = rnorm(mean=200, sd=10, n=np)
+height = runif(min=5, max=15, n=np)
+
+
+X1 = cbind.data.frame(k_o, k_d, v, height=height)
+
+# repeat sampling
+k_o = rnorm(mean=0.1,sd=0.1*0.1, n=np)
+k_d = rnorm(mean=0.7, sd=0.7*0.1, n=np)
+v = rnorm(mean=200, sd=10, n=np)
+height = runif(min=5, max=15, n=np)
+
+X2 = cbind.data.frame(k_o, k_d, v, height=height)
+
+# there are different versions of sobol functions that have different approaches for estimating parameters and indices, we use an approach implemented by jansen
+
+sens_cat_sobol = sobolSalt(model = NULL, X1, X2, nboot = 100)
+```
+
+
+```{r}
+# Take a look at the Sobol generated sensitivity object
+# your parameters sets for sensitivity analysis are in X
+
+# run model for all parameter sets
+# make sure you give the parameters names
+
+parms = as.data.frame(sens_cat_sobol$X)
+colnames(parms)= colnames(X1)
+res = pmap_dbl(parms, Catm)
+
+
+sens_Catm_Sobol = sensitivity::tell(sens_Catm_Sobol,res, res.names="ga")
+
+# main effect:  partitions variance (main effect without co-variance) - sums approximately to one
+sens_Catm_Sobol$S
+```
+
