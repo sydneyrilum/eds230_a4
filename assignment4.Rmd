@@ -1,5 +1,5 @@
 ---
-title: "Assignment w/ Latin Hypercube Sampling (LHS)"
+title: "EDS 230/ESM 232 Assignment with Latin Hypercube Sampling (LHS)"
 author: "Mia Forsline, Kristin Gill, Sydney Rilum"
 date: '2022-04-26'
 output:
@@ -198,21 +198,24 @@ pse::plotprcc(sens_cat)
 # list PRCC value for each parameter
 sens_cat$prcc
 
+#set object values to reference in text 
+v = round(0.9929307, digits = 2)
+h = round(0.6190269, digits = 2)
+k0 = round(0.5826310, digits = 2)
+kd = round(0.7463957, digits = 2) 
+
 # compare PRCC with parameter values
-# head(sens_cat)
+#head(sens_cat, n = 10)
 ```
-
-
 
 ## f) Discuss what your results tell you about how aerodynamic conductance varies with the different parameters.
 
 *What does it suggest about what you should focus on if you want to reduce uncertainty in aerodynamic conductance estimates? Does this tell you anything about the sensitivity of plant water use to climate change?*
 
-Aerodynamic conductance has the strongest positive relationship to the windspeed (v) parameter, as an increase in windspeed leads to an increase in aerodynamic conductance. Although aerodynamic conductance varies with vegetation height (h), kd, and k0 parameters, there does not appear to be any strong trends or relationships based on exploratory plots. Windspeed has the largest PRCC (0.99) of all parameters, indicating a strong correlation to aerodynamic conductance, whereas the other parameters have PRCC's ranging from 0.63 to 0.72, indicating moderate correlations. These results make sense, as windspeed likely impacts plant water use the most (due greater evaporation in windier conditions), compared to plant height, kd, and k0 parameters. Therefore, based on our sensitivity analysis results, we should focus on the windspeed parameter (v) to reduce uncertainty in aerodynamic conductance estimates. 
+Based on the scatterplots, aerodynamic conductance has the strongest positive relationship to the windspeed (`v`) parameter. An increase in windspeed leads to an increase in aerodynamic conductance, which leads to the data points clustering very closely to the line of best fit. 
 
+Although aerodynamic conductance varies with vegetation height (`h`), `kd`, and `k0` parameters, there does not appear to be any strong trends or relationships based on the exploratory scatterplots. Those trend lines are much flatter compared to the windspeed plot, and the data points are more scattered. 
 
+Windspeed has the largest PRCC value (`r v`) of all parameters, indicating a strong correlation to aerodynamic conductance. In contrast, the other parameters have PRCC's ranging from `r k0` to `r kd`, indicating moderate correlations. 
 
-
-
-
-
+These results are logical, as windspeed likely impacts plant water use the most (due greater evaporation in windier conditions), compared to plant height (`h`), `kd`, and `k0` parameters. Therefore, based on our sensitivity analysis results, we should focus on the windspeed parameter (`v`) to reduce uncertainty in aerodynamic conductance estimates.
